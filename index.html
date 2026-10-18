@@ -1,396 +1,359 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#2e7d32">
-<title>NutriBridge — SDG 2 & 3</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: #f1f8e9; color: #1b3d1b; padding-bottom: 70px;
-  }
-  header {
-    background: linear-gradient(135deg, #2e7d32, #66bb6a);
-    color: #fff; padding: 18px 16px; text-align: center;
-    position: sticky; top: 0; z-index: 1000;
-  }
-  header h1 { margin: 0; font-size: 20px; }
-  header p { margin: 4px 0 0; font-size: 12px; opacity: .9; }
-  main { padding: 12px; max-width: 600px; margin: 0 auto; }
-  section { display: none; }
-  section.active { display: block; }
-  .card {
-    background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  .card h2 { margin: 0 0 10px; font-size: 15px; color: #2e7d32; }
-  input, select {
-    width: 100%; padding: 10px; border: 1px solid #c8e6c9; border-radius: 10px;
-    margin-bottom: 8px; background: #f9fff9; font: inherit;
-  }
-  button.primary {
-    background: #2e7d32; color: #fff; border: 0; padding: 10px 16px;
-    border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; font: inherit;
-  }
-  button.primary:active { background: #1b5e20; }
-  .row { display: flex; gap: 8px; }
-  .row > * { flex: 1; }
-  .item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px; border-bottom: 1px solid #e8f5e9; font-size: 14px;
-  }
-  .item:last-child { border-bottom: 0; }
-  .del {
-    background: #ffebee; color: #c62828; border: 0; border-radius: 8px;
-    padding: 6px 10px; cursor: pointer; font-weight: bold;
-  }
-  .stat {
-    display: flex; justify-content: space-between; padding: 8px 0;
-    font-size: 14px; border-bottom: 1px dashed #c8e6c9;
-  }
-  .stat:last-child { border-bottom: 0; }
-  .big { font-size: 24px; font-weight: 700; color: #2e7d32; }
-  .warn { color: #e65100; font-weight: 600; }
-  .ok { color: #2e7d32; font-weight: 600; }
-  .badge {
-    display: inline-block; font-size: 11px; padding: 3px 8px;
-    border-radius: 20px; background: #e8f5e9; color: #2e7d32; margin-left: 6px;
-  }
-  .badge.warn { background: #fff3e0; color: #e65100; }
-  .badge.ok { background: #e8f5e9; color: #2e7d32; }
-  nav.tabs {
-    position: fixed; bottom: 0; left: 0; right: 0; display: flex;
-    background: #fff; border-top: 1px solid #e0e0e0; z-index: 1000;
-    box-shadow: 0 -2px 8px rgba(0,0,0,.06);
-  }
-  nav.tabs button {
-    flex: 1; border: 0; background: none; padding: 10px 0 8px;
-    font-size: 11px; color: #666; cursor: pointer; font: inherit;
-  }
-  nav.tabs button.active { color: #2e7d32; font-weight: 700; }
-  nav.tabs button span { display: block; font-size: 20px; }
-  #map { height: 320px; border-radius: 12px; margin-bottom: 10px; }
-  .point-emoji { background: none; border: none; }
-  .plan-item {
-    padding: 10px; background: #f1f8e9; border-radius: 10px;
-    margin-bottom: 8px; font-size: 13px;
-  }
-  .plan-item b { color: #2e7d32; }
-  .empty { text-align: center; color: #999; font-size: 13px; padding: 12px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#09090b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>DoctorFood</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 🔴 BU YERGA O'ZINGIZNING FIREBASE KODINGIZNI QO'YING!
+        const firebaseConfig = {
+         apiKey: "AIzaSyDWNTOXojUobvEs7WtBkLaHJZgHfKel3aE",
+  authDomain: "doctorfood-f32e0.firebaseapp.com",
+  projectId: "doctorfood-f32e0",
+  storageBucket: "doctorfood-f32e0.firebasestorage.app",
+  messagingSenderId: "273160436639",
+  appId: "1:273160436639:web:f31b89e3dee70515f41baa",
+  measurementId: "G-00KD5R35XK"
+        };
+
+        // Firebase'ni ishga tushirish
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Global funksiyalar (HTML dagi onclick lar uchun)
+        window.db = db;
+        window.firestoreFuncs = { collection, addDoc, getDocs, query, where, doc, updateDoc, deleteDoc };
+    </script>
+
+    <style>
+        /* ... (Oldingi CSS kodingiz to'liq saqlanadi) ... */
+        :root { --bg: #09090b; --surface: #18181b; --surface-hover: #27272a; --primary: #10b981; --primary-glow: rgba(16, 185, 129, 0.2); --text: #fafafa; --text-muted: #a1a1aa; --border: #27272a; --danger: #ef4444; --warning: #f59e0b; --blue: #3b82f6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Manrope', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 90px; -webkit-font-smoothing: antialiased; }
+        
+        #auth-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; padding: 24px; }
+        #auth-screen.hidden { display: none; }
+        .auth-logo { text-align: center; margin-bottom: 40px; }
+        .auth-logo svg { width: 64px; height: 64px; margin-bottom: 16px; }
+        .auth-logo h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        .auth-logo p { color: var(--text-muted); font-size: 14px; margin-top: 8px; }
+
+        .app-header { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(9, 9, 11, 0.8); backdrop-filter: blur(12px); z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand svg { width: 28px; height: 28px; }
+        .brand h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .profile-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 800; font-size: 16px; cursor: pointer; }
+        .admin-btn { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; }
+
+        main { padding: 0 24px; max-width: 600px; margin: 0 auto; }
+        section { display: none; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .section-title { font-size: 24px; font-weight: 800; margin: 10px 0 20px; letter-spacing: -0.5px; }
+
+        .card { background: var(--surface); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card h3 i { color: var(--primary); }
+
+        .smart-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; gap: 14px; align-items: flex-start; }
+        .smart-card i { font-size: 24px; color: var(--primary); margin-top: 2px; }
+        .smart-card div { font-size: 13px; font-weight: 500; line-height: 1.5; }
+        .smart-card b { color: var(--primary); font-weight: 700; }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .stat-box { background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .stat-box i { font-size: 20px; margin-bottom: 4px; }
+        .stat-box .val { font-size: 22px; font-weight: 800; }
+        .stat-box .lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+        input, select { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; color: var(--text); font-family: inherit; font-size: 14px; font-weight: 500; margin-bottom: 10px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); background: rgba(255,255,255,0.05); }
+        button.primary { background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 14px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        button.primary:active { transform: scale(0.97); opacity: 0.9; }
+        .row { display: flex; gap: 10px; }
+        .row > * { flex: 1; }
+
+        .water-grid { display: flex; gap: 8px; margin-top: 12px; }
+        .water-glass { flex: 1; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 20px; }
+        .water-glass.filled { background: rgba(59, 130, 246, 0.2); border-color: var(--blue); color: var(--blue); }
+
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .list-item .info { display: flex; flex-direction: column; gap: 2px; }
+        .list-item .title { font-size: 14px; font-weight: 600; }
+        .list-item .subtitle { font-size: 12px; color: var(--text-muted); }
+        .icon-btn { width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,0.05); border: none; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .icon-btn.danger { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+
+        nav.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 10px calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
+        nav.bottom-nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); cursor: pointer; transition: 0.2s; width: 60px; }
+        nav.bottom-nav button i { font-size: 22px; transition: 0.2s; }
+        nav.bottom-nav button span { font-size: 10px; font-weight: 600; }
+        nav.bottom-nav button.active { color: var(--primary); }
+        nav.bottom-nav button.active i { transform: translateY(-2px); }
+        .badge { font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; }
+    </style>
 </head>
 <body>
 
-<header>
-  <h1>🌱 NutriBridge</h1>
-  <p>SDG 2 · SDG 3 — Oziq-ovqat va salomatlik hamkori</p>
-</header>
+<!-- RO'YXATDAN O'TISH -->
+<div id="auth-screen">
+    <div class="auth-logo">
+        <h1>DoctorFood</h1>
+        <p>Sog'lom hayotga birinchi qadam</p>
+    </div>
+    <div class="card">
+        <h3>Ro'yxatdan o'tish</h3>
+        <input id="regName" placeholder="Ismingiz (masalan: Jasur)">
+        <input id="regAge" type="number" placeholder="Yoshingiz (masalan: 20)">
+        <button class="primary" onclick="registerUser()"><i class="fa-solid fa-arrow-right"></i> Boshlash</button>
+    </div>
+</div>
 
-<main>
-  <!-- ASOSIY -->
-  <section id="tab-home" class="active">
-    <div class="card">
-      <h2>Bugungi holat</h2>
-      <div class="stat"><span>Ovqatdan olingan kaloriya</span><span id="homeCal">0 / 2000</span></div>
-      <div class="stat"><span>Kuzatilayotgan bolalar</span><span id="homeKids">0</span></div>
-      <div class="stat"><span>Oziq-ovqat nuqtalari</span><span id="homePoints">0</span></div>
+<!-- ASOSIY ILOVA -->
+<div id="app-screen" style="display: none;">
+    <div class="app-header">
+        <div class="brand">
+            <h1>DoctorFood</h1>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <!-- ADMIN TUGMASI -->
+            <button class="admin-btn" onclick="switchTab('admin')"><i class="fa-solid fa-shield-halved"></i> Admin</button>
+            <div class="profile-avatar" id="headerAvatar" onclick="switchTab('profile')">J</div>
+        </div>
     </div>
-    <div class="card">
-      <h2>SDG 2 maqsadi</h2>
-      <p style="font-size:13px;margin:0;color:#555">Ochlikni yo'q qilish, oziq-ovqat xavfsizligini ta'minlash va to'yib ovqatlanmaslikni bartaraf etish.</p>
-    </div>
-    <div class="card">
-      <h2>SDG 3 maqsadi</h2>
-      <p style="font-size:13px;margin:0;color:#555">Sog'lom turmush tarzini ta'minlash va barcha yoshdagi insonlar farovonligini oshirish.</p>
-    </div>
-  </section>
 
-  <!-- XARITA -->
-  <section id="tab-map">
-    <div class="card">
-      <h2>📍 Oziq-ovqat xaritasi</h2>
-      <div id="map"></div>
-      <input id="ptName" placeholder="Nomi (masalan: Oziq-ovqat banki)">
-      <div class="row">
-        <select id="ptType">
-          <option value="bank">🏦 Oziq-ovqat banki</option>
-          <option value="free">🍲 Bepul ovqat</option>
-          <option value="shop">🛒 Arzon do'kon</option>
-        </select>
-        <button class="primary" onclick="addMyLocationPoint()">Mening joylashuvim</button>
-      </div>
-      <div id="ptList"></div>
-    </div>
-  </section>
+    <main>
+        <section id="tab-home" class="active">
+            <h2 class="section-title" id="greetingText">Salom 👋</h2>
+            <div class="card smart-card">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <div id="smartText">Ma'lumotlar saqlanmoqda...</div>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-box"><i class="fa-solid fa-fire" style="color: #f59e0b;"></i><div class="val" id="homeCal">0</div><div class="lbl">Kaloriya</div></div>
+                <div class="stat-box"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i><div class="val" id="homeWater">0/8</div><div class="lbl">Suv</div></div>
+            </div>
+        </section>
 
-  <!-- OVQAT -->
-  <section id="tab-food">
-    <div class="card">
-      <h2>🍽 Ovqatlanish kundaligi</h2>
-      <div class="row">
-        <input id="mealName" placeholder="Taom nomi">
-        <input id="mealCal" type="number" placeholder="kkal" style="max-width:110px">
-      </div>
-      <button class="primary" onclick="addMeal()">+ Qo'shish</button>
-      <div style="margin-top:12px">
-        <div class="stat"><span>Bugungi jami</span><span class="big" id="totalCal">0</span></div>
-        <div class="stat"><span>Maqsad</span><span>2000 kkal</span></div>
-        <div class="stat"><span>Holat</span><span id="calStatus">—</span></div>
-      </div>
-      <div id="mealList"></div>
-    </div>
-  </section>
+        <section id="tab-food">
+            <h2 class="section-title">Ovqat va Suv</h2>
+            <div class="card">
+                <h3><i class="fa-solid fa-droplet" style="color: var(--blue);"></i> Suv Balansi</h3>
+                <div class="water-grid" id="waterTracker"></div>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-utensils"></i> Kundalik Kaloriya</h3>
+                <div class="row">
+                    <input id="mealName" placeholder="Taom nomi">
+                    <input id="mealCal" type="number" placeholder="kkal" style="max-width:100px">
+                </div>
+                <button class="primary" onclick="addMeal()"><i class="fa-solid fa-plus"></i> Qo'shish</button>
+                <div id="mealList" style="margin-top: 16px;"></div>
+            </div>
+        </section>
 
-  <!-- BOLALAR -->
-  <section id="tab-kids">
-    <div class="card">
-      <h2>👶 Bolalar o'sishini kuzatish</h2>
-      <input id="kidName" placeholder="Bola ismi">
-      <input id="kidBirth" type="date">
-      <button class="primary" onclick="addKid()">+ Bola qo'shish</button>
-      <div id="kidList" style="margin-top:12px"></div>
-    </div>
-  </section>
+        <!-- ADMIN PANEL -->
+        <section id="tab-admin">
+            <h2 class="section-title" style="color: var(--danger);"><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Faqat administrator uchun. Bu yerda barcha foydalanuvchilar ro'yxati ko'rinadi.</p>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-users"></i> Foydalanuvchilar (Firebase'dan)</h3>
+                <button class="primary" onclick="loadAdminData()" style="margin-bottom: 16px; background: var(--surface-hover); color: var(--text);">
+                    <i class="fa-solid fa-rotate"></i> Ma'lumotlarni yangilash
+                </button>
+                <div id="adminUserList">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 13px;">Yuklash uchun tugmani bosing...</div>
+                </div>
+            </div>
+        </section>
 
-  <!-- REJA -->
-  <section id="tab-plan">
-    <div class="card">
-      <h2>🥗 Arzon va to'yimli ovqat rejasi</h2>
-      <div class="plan-item"><b>Nonushta:</b> 2 tuxum + non + choy — ~350 kkal, arzon protein</div>
-      <div class="plan-item"><b>Tushlik:</b> Guruch + loviya + sabzi — ~600 kkal, tola va o'simlik oqsili</div>
-      <div class="plan-item"><b>Peshin:</b> Olma yoki banan — ~100 kkal, vitaminlar</div>
-      <div class="plan-item"><b>Kechki:</b> Kartoshka + tvorog + ko'kat — ~500 kkal, kaltsiy</div>
-      <div class="plan-item"><b>Kunlik:</b> 1.5–2 litr suv ichishni unutmang 💧</div>
-    </div>
-  </section>
-</main>
+        <section id="tab-profile">
+            <h2 class="section-title">Profil</h2>
+            <div class="card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-glow); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; margin: 0 auto 16px;">
+                    <span id="profileAvatar">J</span>
+                </div>
+                <h2 id="profileName" style="font-size: 20px; font-weight: 800;">Ism</h2>
+                <p id="profileAge" style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Yosh</p>
+                <button class="primary" style="background: var(--surface-hover); color: var(--text);" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Chiqish
+                </button>
+            </div>
+        </section>
+    </main>
 
-<nav class="tabs">
-  <button data-tab="home" class="active" onclick="switchTab('home')"><span>🏠</span>Asosiy</button>
-  <button data-tab="map" onclick="switchTab('map')"><span>📍</span>Xarita</button>
-  <button data-tab="food" onclick="switchTab('food')"><span>🍽</span>Ovqat</button>
-  <button data-tab="kids" onclick="switchTab('kids')"><span>👶</span>Bolalar</button>
-  <button data-tab="plan" onclick="switchTab('plan')"><span>🥗</span>Reja</button>
-</nav>
+    <nav class="bottom-nav">
+        <button data-tab="home" class="active" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Asosiy</span></button>
+        <button data-tab="food" onclick="switchTab('food')"><i class="fa-solid fa-apple-whole"></i><span>Ovqat</span></button>
+        <button data-tab="profile" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i><span>Profil</span></button>
+    </nav>
+</div>
 
 <script>
-const store = {
-  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
-};
+    // Local ma'lumotlar ombori
+    const store = {
+        get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+        set(k, v) { localStorage.setItem(k, JSON.stringify(v)); },
+        remove(k) { localStorage.removeItem(k); }
+    };
 
-let mapReady = false, map, markers = [];
+    let currentUser = store.get('currentUser', null);
+    let currentUserId = store.get('currentUserId', null);
 
-function switchTab(name) {
-  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-  if (name === 'map') {
-    if (!mapReady) initMap();
-    else setTimeout(() => map.invalidateSize(), 100);
-  }
-  renderAll();
-}
+    document.addEventListener("DOMContentLoaded", () => {
+        if (currentUser && currentUserId) {
+            showApp();
+        }
+    });
 
-/* ===== XARITA ===== */
-function initMap() {
-  map = L.map('map').setView([41.3111, 69.2797], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '© OpenStreetMap'
-  }).addTo(map);
-  mapReady = true;
-  drawPoints();
-}
-
-function pointIcon(type) {
-  const emoji = { bank: '🏦', free: '🍲', shop: '🛒' }[type] || '📍';
-  return L.divIcon({
-    html: '<div style="font-size:24px">' + emoji + '</div>',
-    className: 'point-emoji', iconSize: [24, 24], iconAnchor: [12, 12]
-  });
-}
-
-function typeLabel(t) {
-  return { bank: 'Oziq-ovqat banki', free: 'Bepul ovqat', shop: "Arzon do'kon" }[t] || t;
-}
-
-function drawPoints() {
-  if (!map) return;
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  store.get('points', []).forEach(p => {
-    markers.push(
-      L.marker([p.lat, p.lng], { icon: pointIcon(p.type) })
-        .addTo(map)
-        .bindPopup('<b>' + esc(p.name) + '</b><br>' + typeLabel(p.type))
-    );
-  });
-}
-
-function addMyLocationPoint() {
-  const name = document.getElementById('ptName').value.trim();
-  if (!name) { alert('Nom kiriting'); return; }
-  const type = document.getElementById('ptType').value;
-  if (!navigator.geolocation) { alert('Geolokatsiya qo\'llab-quvvatlanmaydi'); return; }
-  navigator.geolocation.getCurrentPosition(pos => {
-    const points = store.get('points', []);
-    points.push({ id: Date.now(), name, type, lat: pos.coords.latitude, lng: pos.coords.longitude });
-    store.set('points', points);
-    document.getElementById('ptName').value = '';
-    drawPoints(); renderPointsList(); renderAll();
-  }, () => alert('Joylashuvni olib bo\'lmadi. Ruxsat bering.'));
-}
-
-function renderPointsList() {
-  const points = store.get('points', []);
-  const el = document.getElementById('ptList');
-  if (!points.length) { el.innerHTML = '<div class="empty">Hali nuqta qo\'shilmagan</div>'; return; }
-  el.innerHTML = points.map(p =>
-    '<div class="item"><div><b>' + esc(p.name) + '</b><br><small>' + typeLabel(p.type) + '</small></div>' +
-    '<button class="del" onclick="delPoint(' + p.id + ')">✕</button></div>'
-  ).join('');
-}
-
-function delPoint(id) {
-  store.set('points', store.get('points', []).filter(p => p.id !== id));
-  drawPoints(); renderPointsList(); renderAll();
-}
-
-/* ===== OVQAT ===== */
-function today() { return new Date().toISOString().slice(0, 10); }
-
-function addMeal() {
-  const name = document.getElementById('mealName').value.trim();
-  const cal = parseInt(document.getElementById('mealCal').value);
-  if (!name || !cal || cal <= 0) { alert('Nom va kaloriyani kiriting'); return; }
-  const meals = store.get('meals', []);
-  meals.push({ id: Date.now(), name, cal, date: today() });
-  store.set('meals', meals);
-  document.getElementById('mealName').value = '';
-  document.getElementById('mealCal').value = '';
-  renderMeals(); renderAll();
-}
-
-function delMeal(id) {
-  store.set('meals', store.get('meals', []).filter(m => m.id !== id));
-  renderMeals(); renderAll();
-}
-
-function renderMeals() {
-  const meals = store.get('meals', []).filter(m => m.date === today());
-  const total = meals.reduce((s, m) => s + m.cal, 0);
-  document.getElementById('totalCal').textContent = total + ' kkal';
-
-  const status = document.getElementById('calStatus');
-  if (total === 0) { status.textContent = '—'; status.className = ''; }
-  else if (total < 1500) { status.textContent = 'Kam ⚠️'; status.className = 'warn'; }
-  else if (total <= 2500) { status.textContent = 'Yaxshi ✓'; status.className = 'ok'; }
-  else { status.textContent = "Ko'p ⚠️"; status.className = 'warn'; }
-
-  document.getElementById('mealList').innerHTML = meals.length
-    ? meals.map(m => '<div class="item"><span>' + esc(m.name) + '</span>' +
-        '<span>' + m.cal + ' kkal <button class="del" onclick="delMeal(' + m.id + ')">✕</button></span></div>').join('')
-    : '<div class="empty">Bugun hali ovqat qo\'shilmagan</div>';
-}
-
-/* ===== BOLALAR (WHO median vazni) ===== */
-const WHO = [[0,3.3],[1,4.5],[2,5.6],[3,6.4],[4,7.0],[5,7.5],[6,7.9],[7,8.3],[8,8.6],[9,8.9],[10,9.2],[11,9.4],[12,9.6],[15,10.3],[18,10.9],[21,11.5],[24,12.2],[30,13.3],[36,14.3],[42,15.3],[48,16.3],[54,17.3],[60,18.3]];
-
-function medianWeight(months) {
-  if (months <= 0) return WHO[0][1];
-  for (let i = 1; i < WHO.length; i++) {
-    if (months <= WHO[i][0]) {
-      const [m0, w0] = WHO[i - 1], [m1, w1] = WHO[i];
-      return w0 + (w1 - w0) * (months - m0) / (m1 - m0);
+    // 🔴 1. FIREBASE'GA SAQLASH (Ro'yxatdan o'tish)
+    async function registerUser() {
+        const name = document.getElementById('regName').value.trim();
+        const age = document.getElementById('regAge').value.trim();
+        
+        if (!name || !age) { alert("Iltimos, ism va yoshni kiriting!"); return; }
+        
+        try {
+            // Firebase'dagi "users" kolleksiyasiga yangi hujjat qo'shish
+            const { collection, addDoc } = window.firestoreFuncs;
+            const docRef = await addDoc(collection(window.db, "users"), {
+                name: name,
+                age: parseInt(age),
+                createdAt: new Date().toISOString()
+            });
+            
+            // Foydalanuvchi ID sini saqlash
+            currentUser = { name, age };
+            currentUserId = docRef.id;
+            
+            store.set('currentUser', currentUser);
+            store.set('currentUserId', currentUserId);
+            
+            showApp();
+        } catch (e) {
+            console.error("Xatolik: ", e);
+            alert("Serverga ulanishda xatolik. Internetni tekshiring.");
+        }
     }
-  }
-  return WHO[WHO.length - 1][1];
-}
 
-function monthAge(birth) {
-  const b = new Date(birth), n = new Date();
-  let m = (n.getFullYear() - b.getFullYear()) * 12 + (n.getMonth() - b.getMonth());
-  if (n.getDate() < b.getDate()) m--;
-  return Math.max(0, m);
-}
+    // 🔴 2. ADMIN PANEL UCHUN MA'LUMOTLARNI YUKLASH
+    async function loadAdminData() {
+        const el = document.getElementById('adminUserList');
+        el.innerHTML = '<div style="text-align:center; color:var(--text-muted);">Yuklanmoqda...</div>';
+        
+        try {
+            const { collection, getDocs } = window.firestoreFuncs;
+            const querySnapshot = await getDocs(collection(window.db, "users"));
+            
+            if (querySnapshot.empty) {
+                el.innerHTML = '<div style="text-align:center; color:var(--text-muted);">Hozircha foydalanuvchilar yo\'q.</div>';
+                return;
+            }
 
-function addKid() {
-  const name = document.getElementById('kidName').value.trim();
-  const birth = document.getElementById('kidBirth').value;
-  if (!name || !birth) { alert("Ism va tug'ilgan sanani kiriting"); return; }
-  const kids = store.get('kids', []);
-  kids.push({ id: Date.now(), name, birth, measures: [] });
-  store.set('kids', kids);
-  document.getElementById('kidName').value = '';
-  document.getElementById('kidBirth').value = '';
-  renderKids(); renderAll();
-}
-
-function delKid(id) {
-  store.set('kids', store.get('kids', []).filter(k => k.id !== id));
-  renderKids(); renderAll();
-}
-
-function addMeasure(kidId) {
-  const w = parseFloat(prompt('Vazn (kg):'));
-  const h = parseFloat(prompt("Bo'y (sm):"));
-  if (!w || !h) return;
-  const kids = store.get('kids', []);
-  const k = kids.find(x => x.id === kidId);
-  if (!k) return;
-  k.measures.push({ date: today(), weight: w, height: h });
-  store.set('kids', kids);
-  renderKids();
-}
-
-function renderKids() {
-  const kids = store.get('kids', []);
-  const el = document.getElementById('kidList');
-  if (!kids.length) { el.innerHTML = '<div class="empty">Hali bola qo\'shilmagan</div>'; return; }
-
-  el.innerHTML = kids.map(k => {
-    const months = monthAge(k.birth);
-    const med = medianWeight(Math.min(months, 60));
-    const last = k.measures[k.measures.length - 1];
-    let status = '<span class="badge">O\'lchov yo\'q</span>';
-    if (last) {
-      if (last.weight < med * 0.8) status = '<span class="badge warn">Kam vazn ⚠️</span>';
-      else if (last.weight < med * 0.9) status = '<span class="badge">Biroz kam</span>';
-      else status = '<span class="badge ok">Normal ✓</span>';
+            let html = '';
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const date = new Date(data.createdAt).toLocaleDateString('uz-UZ');
+                html += `
+                    <div class="list-item">
+                        <div class="info">
+                            <div class="title">${data.name} (${data.age} yosh)</div>
+                            <div class="subtitle">ID: ${doc.id.slice(0, 8)}... | Sana: ${date}</div>
+                        </div>
+                        <div class="badge" style="background: var(--primary-glow); color: var(--primary);">Faol</div>
+                    </div>
+                `;
+            });
+            el.innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            el.innerHTML = '<div style="text-align:center; color:var(--danger);">Xatolik yuz berdi. Firebase sozlamalarini tekshiring.</div>';
+        }
     }
-    const lastInfo = last
-      ? '<br><small>Oxirgi: ' + last.weight + ' kg, ' + last.height + ' sm (' + last.date + ')</small>'
-      : '';
-    return '<div class="item"><div><b>' + esc(k.name) + '</b><span class="badge">' + months + ' oy</span>' +
-      lastInfo + '<br><small>Kutilgan: ~' + med.toFixed(1) + ' kg ' + status + '</small></div>' +
-      '<div style="display:flex;flex-direction:column;gap:4px">' +
-      '<button class="del" style="background:#e8f5e9;color:#2e7d32" onclick="addMeasure(' + k.id + ')">+</button>' +
-      '<button class="del" onclick="delKid(' + k.id + ')">✕</button></div></div>';
-  }).join('');
-}
 
-/* ===== UMUMIY ===== */
-function renderAll() {
-  const meals = store.get('meals', []).filter(m => m.date === today());
-  const total = meals.reduce((s, m) => s + m.cal, 0);
-  document.getElementById('homeCal').textContent = total + ' / 2000';
-  document.getElementById('homeKids').textContent = store.get('kids', []).length;
-  document.getElementById('homePoints').textContent = store.get('points', []).length;
-}
+    function showApp() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        
+        const firstLetter = currentUser.name.charAt(0).toUpperCase();
+        document.getElementById('headerAvatar').textContent = firstLetter;
+        document.getElementById('profileAvatar').textContent = firstLetter;
+        document.getElementById('profileName').textContent = currentUser.name;
+        document.getElementById('profileAge').textContent = currentUser.age + " yosh";
+        document.getElementById('greetingText').textContent = "Salom, " + currentUser.name + " 👋";
+        
+        renderAll();
+    }
 
-function esc(s) {
-  return String(s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
-}
+    function logout() {
+        if(confirm("Akkauntdan chiqmoqchimisiz?")) {
+            store.remove('currentUser');
+            store.remove('currentUserId');
+            location.reload();
+        }
+    }
 
-/* ===== ISHGA TUSHIRISH ===== */
-renderMeals();
-renderKids();
-renderPointsList();
-renderAll();
+    function switchTab(name) {
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        document.querySelectorAll('nav.bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    }
+
+    // Qolgan funksiyalar (Suv, Ovqat)
+    function renderWater() {
+        const water = store.get('water', 0);
+        const el = document.getElementById('waterTracker');
+        let html = '';
+        for(let i=1; i<=8; i++) {
+            html += `<div class="water-glass ${i <= water ? 'filled' : ''}" onclick="setWater(${i})"><i class="fa-solid fa-droplet"></i></div>`;
+        }
+        el.innerHTML = html;
+        document.getElementById('homeWater').textContent = water + '/8';
+    }
+
+    function setWater(count) { store.set('water', count); renderWater(); }
+
+    function today() { return new Date().toISOString().slice(0, 10); }
+
+    function addMeal() {
+        const name = document.getElementById('mealName').value.trim();
+        const cal = parseInt(document.getElementById('mealCal').value);
+        if (!name || !cal || cal <= 0) { alert('Nom va kaloriyani kiriting'); return; }
+        
+        const meals = store.get('meals', []);
+        meals.push({ id: Date.now(), name, cal, date: today() });
+        store.set('meals', meals);
+        
+        document.getElementById('mealName').value = '';
+        document.getElementById('mealCal').value = '';
+        renderMeals();
+    }
+
+    function renderMeals() {
+        const meals = store.get('meals', []).filter(m => m.date === today());
+        const total = meals.reduce((s, m) => s + m.cal, 0);
+        document.getElementById('homeCal').textContent = total;
+
+        const el = document.getElementById('mealList');
+        if(!meals.length) { el.innerHTML = '<div style="text-align:center; padding: 20px 0; color: var(--text-muted); font-size: 13px;">Ovqat qo\'shilmagan</div>'; return; }
+        el.innerHTML = meals.map(m => 
+            '<div class="list-item"><div class="info"><div class="title">' + m.name + '</div><div class="subtitle">' + m.cal + ' kkal</div></div></div>'
+        ).join('');
+    }
+
+    function renderAll() { renderWater(); renderMeals(); }
 </script>
 </body>
 </html>
